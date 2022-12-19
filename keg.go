@@ -58,6 +58,22 @@ const IsoTimeExpStr = `\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ`
 // restore functionality otherwise lost by the limited, exported methods of
 // the interface.
 //
+// String
+//
+// The fmt.Stringer interface is not required, but strongly recommended.
+// It should call MarshalText.
+//
+// MarshalText
+//
+// The encoding.TextMarshaler interface is not required, but strongly
+// recommended. See NewNodeFromLine for formatting of the line.
+//
+// UnmarshalText
+//
+// The encoding.TextUnmarshaler interface is not required, but strongly
+// recommended. NewNodeFromLine should actually call UnmarshalText in
+// most cases.
+//
 type Node interface {
 	ID() string
 	IntID() int
@@ -92,9 +108,22 @@ func (n node) IntID() int {
 	return v
 }
 
-// NewNodeFromLine takes a line of tab-delimited text and returns a node
-// from it. A pointer to a struct that implements the Node interface is
-// always returned even if the struct fields are empty.
+const UndefinedID = "-1"
+
+// NewNode returns a pointer to a new struct that fulfills the Node
+// interface, setting the ID to UndefinedID (-1) Changed time to now, and
+// initializing the Nodes with an empty slice.
+func NewNode() *node {
+	n := new(node)
+	n.id = "-1"
+	n.changed = time.Now().UTC()
+	n.nodes = []string{}
+	return n
+}
+
+// NewNodeFromLine takes a line of tab-delimited text and returns an
+// implementation of the Node interface, which is always returned even
+// if not all fields have been parsed.
 //
 // Fields are expected to be in the following order:
 //
@@ -115,8 +144,16 @@ func (n node) IntID() int {
 //
 func NewNodeFromLine[T string | []byte | []rune](line T) *node {
 	n := new(node)
+	n.UnmarshalText([]byte(string(line)))
+	return n
+}
 
-	f := strings.Split(string(strings.TrimSpace(string(line))), "\t")
+// UnmarshalText takes a line of tab-delimited text and unmarshals it.
+// No error is ever returned as unmarshaling is on a best attempt basis.
+// See NewNodeFromLine for details.
+func (n *node) UnmarshalText(text []byte) error {
+
+	f := strings.Split(string(strings.TrimSpace(string(text))), "\t")
 
 	length := len(f)
 	if length > 4 {
@@ -141,5 +178,15 @@ func NewNodeFromLine[T string | []byte | []rune](line T) *node {
 		n.id = f[0]
 	}
 
-	return n
+	return nil
 }
+
+func (n node) MarshalText() ([]byte, error) {
+	f := []string{n.id, n.changed.Format(IsoTimeLayout), n.title}
+	if n.nodes != nil {
+		f = append(f, strings.Join(n.nodes, ","))
+	}
+	return []byte(strings.Join(f, "\t")), nil
+}
+
+func (n node) String() string { b, _ := n.MarshalText(); return string(b) }

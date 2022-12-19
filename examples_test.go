@@ -2,9 +2,22 @@ package keg_test
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/rwxrob/keg"
 )
+
+func ExampleNewNode() {
+
+	n := keg.NewNode()
+	now := time.Now().UTC()
+
+	fmt.Printf("ID: %q %v\n", n.ID(), n.Changed().Sub(now) < 2*time.Second)
+
+	// Output:
+	// ID: "-1" true
+
+}
 
 func ExampleNewNodeFromLine() {
 
@@ -85,13 +98,13 @@ func ExampleNewNodeFromLine_bad_ID() {
 
 	// parses fine
 	n := keg.NewNodeFromLine("twenty")
-	fmt.Println(n)
+	fmt.Printf("%q\n", n)
 
 	// but panics when IntID attempted
 	n.IntID()
 
 	// Output:
-	// &{twenty  {0 0 <nil>} []}
+	// "twenty\t0001-01-01 00:00:00Z\t"
 	// strconv.Atoi: parsing "twenty": invalid syntax
 
 }
