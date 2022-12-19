@@ -1,14 +1,14 @@
-package libkeg_test
+package keg_test
 
 import (
 	"fmt"
 
-	"github.com/rwxrob/libkeg"
+	"github.com/rwxrob/keg"
 )
 
 func ExampleNewNodeFromLine() {
 
-	n := libkeg.NewNodeFromLine("2\t2022-12-19 11:40:01Z\tSome title\t0,2\n")
+	n := keg.NewNodeFromLine("2\t2022-12-19 11:40:01Z\tSome title\t0,2\n")
 
 	fmt.Println(`ID:`, n.ID())
 	fmt.Printf("IntID: %T %v\n", n.IntID(), n.IntID())
@@ -27,7 +27,7 @@ func ExampleNewNodeFromLine() {
 
 func ExampleNewNodeFromLine_empty() {
 
-	n := libkeg.NewNodeFromLine("")
+	n := keg.NewNodeFromLine("")
 
 	fmt.Printf("ID: %q\n", n.ID())
 	fmt.Printf("Changed: %q\n", n.Changed())
@@ -44,7 +44,7 @@ func ExampleNewNodeFromLine_empty() {
 
 func ExampleNewNodeFromLine_too_Many() {
 
-	n := libkeg.NewNodeFromLine("2\t2022-12-19 11:40:01Z\tSome title\t0,2\tblah\tblah\n")
+	n := keg.NewNodeFromLine("2\t2022-12-19 11:40:01Z\tSome title\t0,2\tblah\tblah\n")
 
 	fmt.Printf("ID: %q\n", n.ID())
 	fmt.Printf("Changed: %q\n", n.Changed())
@@ -61,7 +61,7 @@ func ExampleNewNodeFromLine_too_Many() {
 
 func ExampleNewNodeFromLine_negative_Allowed_But_Wrong() {
 
-	n := libkeg.NewNodeFromLine("-20")
+	n := keg.NewNodeFromLine("-20")
 
 	// note no validation for field itself
 	fmt.Printf("ID: %q\n", n.ID())
@@ -84,7 +84,7 @@ func ExampleNewNodeFromLine_bad_ID() {
 	}()
 
 	// parses fine
-	n := libkeg.NewNodeFromLine("twenty")
+	n := keg.NewNodeFromLine("twenty")
 	fmt.Println(n)
 
 	// but panics when IntID attempted

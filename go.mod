@@ -1,3 +1,3 @@
-module github.com/rwxrob/libkeg
+module github.com/rwxrob/keg
 
 go 1.18

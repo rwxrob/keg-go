@@ -1,4 +1,4 @@
-package libkeg
+package keg
 
 import (
 	"testing"
