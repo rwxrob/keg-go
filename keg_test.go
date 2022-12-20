@@ -57,3 +57,25 @@ func ExampleStringify() {
 	// "some" "thing" "1" "2.234" "stringer" "reader" "foo"
 
 }
+
+func ExampleKeys() {
+	it := map[string]bool{
+		`one`:   true,
+		`two`:   true,
+		`three`: true,
+	}
+
+	for _, v := range keys(it) {
+		fmt.Println(v)
+	}
+	// Unordered Output:
+	// one
+	// two
+	// three
+}
+
+func ExampleAssertID() {
+	fmt.Println(assertID("-1"))
+	// Output:
+	// Node identifier must be positive integer
+}

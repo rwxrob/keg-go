@@ -119,6 +119,17 @@ func NewNodeFromLine[T string | []byte | []rune](line T) *Node {
 	return n
 }
 
+// ReadNode reads a node from the README.md file within the passed
+// dirpath. The last modification time is used as the Created time. The
+// title is parsed from the first line (maximum of 72 runes including
+// the hastag and space). The file is then scanned for any include
+// blocks and if found their node ids are added to the Nodes slice.
+func ReadNode(dirpath string) *Node {
+	node := new(Node)
+	// TODO
+	return node
+}
+
 // UnmarshalText takes a line of tab-delimited text and unmarshals it.
 // No error is ever returned as unmarshaling is on a best attempt basis.
 // See NewNodeFromLine for details.
@@ -178,6 +189,7 @@ func assertID(id string) error {
 //
 //     * ID must be 0 or positive integer string
 //     * Title must not be empty
+//     * Title must be less than 70 runes
 //     * Nodes must all be valid IDs
 //     * Changed must not be time.ZeroValue
 //
@@ -188,13 +200,17 @@ func (n Node) Validate() []error {
 		errors = append(errors, fmt.Errorf(_EmptyTitle))
 	}
 
+	if len([]rune(n.Title)) > 70 {
+		errors = append(errors, fmt.Errorf(_TitleTooLong, len([]rune(n.Title))))
+	}
+
 	if err := assertID(n.ID); err != nil {
-		errors = append(errors, err)
+		errors = append(errors, fmt.Errorf(_InvalidNodeID))
 	}
 
 	for _, v := range n.Nodes {
 		if err := assertID(v); err != nil {
-			errors = append(errors, err)
+			errors = append(errors, fmt.Errorf(_InvalidNodeID))
 		}
 	}
 
