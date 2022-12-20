@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -36,5 +37,23 @@ func TestFetch(t *testing.T) {
 	if string(buf) != "2\t2022-12-19 11:40:01Z\tSome title\t0,2\n" {
 		t.Error(`fetch failed to get body`)
 	}
+
+}
+
+type stringer struct{}
+
+func (s stringer) String() string { return "stringer" }
+
+func ExampleStringify() {
+	r := strings.NewReader(`reader`)
+	stuff := []any{
+		"some", []byte{'t', 'h', 'i', 'n', 'g'},
+		1, 2.234, stringer{}, r, []rune{'f', 'o', 'o'},
+	}
+	for _, s := range stuff {
+		fmt.Printf("%q ", stringify(s))
+	}
+	// Output:
+	// "some" "thing" "1" "2.234" "stringer" "reader" "foo"
 
 }
