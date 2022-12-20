@@ -29,8 +29,12 @@ func TestFetch(t *testing.T) {
 	defer svr.Close()
 
 	buf, err := fetch(svr.URL)
-	if err != nil || string(buf) != "2\t2022-12-19 11:40:01Z\tSome title\t0,2\n" {
-		t.Error(`fetch failed`, err)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(buf) != "2\t2022-12-19 11:40:01Z\tSome title\t0,2\n" {
+		t.Error(`fetch failed to get body`)
 	}
 
 }

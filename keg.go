@@ -57,7 +57,7 @@ func fetch(url string) ([]byte, error) {
 		return body, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
 		return body, ErrFetch{resp}
 	}
 

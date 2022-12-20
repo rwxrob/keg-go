@@ -123,15 +123,33 @@ func ExampleFetchIndex() {
 		})
 	svr := httptest.NewServer(handler)
 	defer svr.Close()
-
 	dex, err := keg.FetchIndex(svr.URL)
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	fmt.Printf("%q\n", dex.Nodes[1])
+
+	dex, err = keg.FetchIndex(`bogus`)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// simulate bad url
+	handler2 := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
+	svr2 := httptest.NewServer(handler2)
+	defer svr2.Close()
+
+	dex, err = keg.FetchIndex(svr2.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// Output:
 	// "30\t2022-12-21 12:40:01Z\tSome other title\t2"
+	// Get "bogus/keg-index": unsupported protocol scheme ""
+	// failed to fetch: 400 Bad Request
 
 }
