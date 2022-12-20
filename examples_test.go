@@ -2,6 +2,7 @@ package keg_test
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -128,6 +129,7 @@ func ExampleFetchIndex() {
 		fmt.Println(err)
 	}
 	fmt.Printf("%q\n", dex.Nodes[1])
+	log.Println(dex.URL)
 
 	dex, err = keg.FetchIndex(`bogus`)
 	if err != nil {
@@ -152,4 +154,18 @@ func ExampleFetchIndex() {
 	// Get "bogus/keg-index": unsupported protocol scheme ""
 	// failed to fetch: 400 Bad Request
 
+}
+
+func ExampleNewIndex() {
+
+	dex := keg.NewIndex()
+
+	fmt.Printf("%q\n", dex.File)
+	fmt.Printf("%q\n", dex.URL)
+	fmt.Printf("%q\n", dex.Nodes)
+
+	//Output:
+	// ""
+	// ""
+	// []
 }

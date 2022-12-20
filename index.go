@@ -11,6 +11,7 @@ const IndexFileName = `keg-index`
 
 type Index struct {
 	File  string
+	URL   string
 	Nodes []*Node
 }
 
@@ -91,6 +92,8 @@ func FetchIndex(kegurl string) (*Index, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	dex.URL = url
 
 	return dex, nil
 }
