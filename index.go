@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const IndexFileName = `keg-index`
+const IndexFileName = `kegdex`
 
 type Index struct {
 	File  string
