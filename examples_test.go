@@ -2,6 +2,8 @@ package keg_test
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"time"
 
 	"github.com/rwxrob/keg"
@@ -106,5 +108,30 @@ func ExampleNewNodeFromLine_bad_ID() {
 	// Output:
 	// "twenty\t0001-01-01 00:00:00Z\t"
 	// strconv.Atoi: parsing "twenty": invalid syntax
+
+}
+
+func ExampleFetchIndex() {
+
+	text := "2\t2022-12-19 11:40:01Z\tSome title\t0,2\n" +
+		"30\t2022-12-21 12:40:01Z\tSome other title\t2\n"
+
+	// simulate server with a keg-index file
+	handler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, text)
+		})
+	svr := httptest.NewServer(handler)
+	defer svr.Close()
+
+	dex, err := keg.FetchIndex(svr.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("%q\n", dex.Nodes[1])
+
+	// Output:
+	// "30\t2022-12-21 12:40:01Z\tSome other title\t2"
 
 }
