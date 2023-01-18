@@ -6,9 +6,9 @@ import (
 
 func TestNode_String(t *testing.T) {
 	n := &Node{
-		ID:    "20",
-		Title: "Some title",
-		Nodes: []string{"3", "5"},
+		ID:       "20",
+		Title:    "Some title",
+		Includes: []string{"3", "5"},
 	}
 	if n.String() != "20\t0001-01-01 00:00:00Z\tSome title\t3,5" {
 		t.Error(`node conversion to string failing`)
@@ -31,7 +31,7 @@ func TestNode_UnmarshalText(t *testing.T) {
 	case n.Title != "Some title":
 		t.Error(`failed to unmarshal title`)
 
-	case n.Nodes[0] != "3" || n.Nodes[1] != "5":
+	case n.Includes[0] != "3" || n.Includes[1] != "5":
 		t.Error(`failed to unmarshal nodes`)
 
 	}

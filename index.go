@@ -87,7 +87,7 @@ func (dex *Index) MapIncludes() {
 	dex.Includes = make(map[string]map[string]*Node, len(dex.Nodes))
 	for _, n := range dex.Nodes {
 		dex.Includes[n.ID] = map[string]*Node{}
-		for _, in := range n.Nodes {
+		for _, in := range n.Includes {
 			dex.Includes[in][n.ID] = n
 		}
 	}
@@ -104,7 +104,7 @@ func (dex Index) MarshalText() ([]byte, error) {
 	}
 	for _, n := range dex.Nodes {
 		str += strings.Join([]string{
-			n.ID, n.Changed.Format(IsoTimeLayout), n.Title, strings.Join(n.Nodes, ","),
+			n.ID, n.Changed.Format(IsoTimeLayout), n.Title, strings.Join(n.Includes, ","),
 		}, "\t") + "\n"
 	}
 	return []byte(str), nil

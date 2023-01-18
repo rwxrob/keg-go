@@ -2,7 +2,6 @@ package keg_test
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -30,14 +29,14 @@ func ExampleNewNodeFromLine() {
 	fmt.Printf("IntID: %T %v\n", n.IntID(), n.IntID())
 	fmt.Println(`Changed:`, n.Changed)
 	fmt.Println(`Title:`, n.Title)
-	fmt.Println(`Nodes:`, n.Nodes)
+	fmt.Println(`Includes:`, n.Includes)
 
 	// Output:
 	// ID: 2
 	// IntID: int 2
 	// Changed: 2022-12-19 11:40:01 +0000 UTC
 	// Title: Some title
-	// Nodes: [0 2]
+	// Includes: [0 2]
 
 }
 
@@ -48,13 +47,13 @@ func ExampleNewNodeFromLine_empty() {
 	fmt.Printf("ID: %q\n", n.ID)
 	fmt.Printf("Changed: %q\n", n.Changed)
 	fmt.Printf("Title: %q\n", n.Title)
-	fmt.Printf("Nodes: %q\n", n.Nodes)
+	fmt.Printf("Includes: %q\n", n.Includes)
 
 	// Output:
 	// ID: ""
 	// Changed: "0001-01-01 00:00:00 +0000 UTC"
 	// Title: ""
-	// Nodes: []
+	// Includes: []
 
 }
 
@@ -65,13 +64,13 @@ func ExampleNewNodeFromLine_too_Many() {
 	fmt.Printf("ID: %q\n", n.ID)
 	fmt.Printf("Changed: %q\n", n.Changed)
 	fmt.Printf("Title: %q\n", n.Title)
-	fmt.Printf("Nodes: %q\n", n.Nodes)
+	fmt.Printf("Includes: %q\n", n.Includes)
 
 	// Output:
 	// ID: ""
 	// Changed: "0001-01-01 00:00:00 +0000 UTC"
 	// Title: ""
-	// Nodes: []
+	// Includes: []
 
 }
 
@@ -129,7 +128,7 @@ func ExampleFetchIndex() {
 		fmt.Println(err)
 	}
 	fmt.Printf("%q\n", dex.Nodes[1])
-	log.Println(dex.URL)
+	//log.Println(dex.URL)
 
 	dex, err = keg.FetchIndex(`bogus`)
 	if err != nil {
@@ -312,13 +311,13 @@ func ExampleIndex_MapIncludes() {
 	n1.Changed = time.Now().UTC()
 	n1.ID = "1"
 	n1.Title = "Title of one"
-	n1.Nodes = []string{`3`, `2`}
+	n1.Includes = []string{`3`, `2`}
 
 	n2 := keg.NewNode()
 	n2.Changed = n1.Changed.Add(-2 * time.Second)
 	n2.ID = "2"
 	n2.Title = "Title of two"
-	n2.Nodes = []string{`2`}
+	n2.Includes = []string{`2`}
 
 	n3 := keg.NewNode()
 	n3.Changed = n1.Changed.Add(2 * time.Second)
@@ -353,13 +352,13 @@ func ExampleIndex_String() {
 	n1.Changed, _ = time.Parse(`2006 Jan 2`, `2023 May 4`)
 	n1.ID = "1"
 	n1.Title = "Title of one"
-	n1.Nodes = []string{`3`, `2`}
+	n1.Includes = []string{`3`, `2`}
 
 	n2 := keg.NewNode()
 	n2.Changed = n1.Changed.Add(-2 * time.Second)
 	n2.ID = "2"
 	n2.Title = "Title of two"
-	n2.Nodes = []string{`2`}
+	n2.Includes = []string{`2`}
 
 	n3 := keg.NewNode()
 	n3.Changed = n1.Changed.Add(2 * time.Second)
@@ -382,13 +381,13 @@ func ExampleIndex_Validate() {
 	n1.Changed, _ = time.Parse(`2006 Jan 2`, `2023 May 4`)
 	n1.ID = "1"
 	n1.Title = ""
-	n1.Nodes = []string{`3`, ``}
+	n1.Includes = []string{`3`, ``}
 
 	n2 := keg.NewNode()
 	n2.Changed = n1.Changed.Add(-2 * time.Second)
 	n2.ID = ""
 	n2.Title = "Title of two"
-	n2.Nodes = []string{`2`}
+	n2.Includes = []string{`2`}
 
 	n3 := keg.NewNode()
 	n3.Changed = n1.Changed.Add(2 * time.Second)
@@ -437,4 +436,33 @@ func ExampleNodeDirs() {
 	// 13
 	// 0
 	// 12
+}
+
+func ExampleParseTitle() {
+	buf := "# Some title\nmore stuff\n"
+	fmt.Println(keg.ParseTitle(buf))
+	// Output:
+	// Some title
+}
+
+func ExampleParseTitle_missing_Prefix() {
+	buf := "Some title\nmore stuff\n"
+	fmt.Printf("%q\n", keg.ParseTitle(buf))
+	// Output:
+	// ""
+}
+
+func ExampleParseTitle_invalid_Runes() {
+	buf := "# Some tit\tle\nmore stuff\n"
+	fmt.Printf("%q\n", keg.ParseTitle(buf))
+	// Output:
+	// "Some tit"
+}
+
+func ExampleParseTitle_gt_70() {
+	buf := "# Some kinda title that is a bit more than 70 runes long, but why would you actually want that"
+	fmt.Printf("%q\n", keg.ParseTitle(buf))
+	// Output:
+	// "Some kinda title that is a bit more than 70 runes long, but why would "
+
 }

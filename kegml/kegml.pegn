@@ -1,0 +1,114 @@
+# KEGML spec.keg.pub/2023-04/kegml
+# Copyright 2023 Robert S Muhlestein (rob@rwx.gg)
+# SPDX-License-Identifier: Apache-2
+
+# WARNING: This specification is under development.
+
+# The Blocks rule specifies the major parts of a KEGML document as
+# blocks without semantic consideration for how those blocks are further
+# parsed. This parsing is generally done as the first pass. Each is then
+# parsed individually as needed for additional granularity.
+
+Blocks    <- TitleB (IncListB / Separator / BulListB / NumListB / FigureB /
+             QuoteB / LatexB / FencedB / DivB / NoteB / ParaB)*
+
+TitleB    <- '#' SP  Title EndB
+Title     <- uprint{1,70}
+IncListB  <- ('*' / '+' / '-') '[' ..EndB
+BulListB  <- ('*' / '+' / '-') SP ..EndB
+NumListB  <- digit{1,8} '.' SP ..EndB
+FigureB   <- '![' ..EndB
+QuoteB    <- '>' SP ..EndB
+NoteB     <- '[^' SP ..EndB
+LatexB    <- '$$' NL ..(NL '$$' EndB)
+Separator <- '----'
+FencedB   <- =FenceTok ..(>FenceTok EndB)
+FenceTok  <- ('~' / BQ){3,8}
+DivB      <- =DivTok ..(>DivTok EndB)
+FenceTok  <- ':'{3,8}
+ParaB     <- !SP ..EndB
+EndB      <- !. / (NL / !. ) / NL{2}
+
+# ---------------------------------------------------------------------
+
+# Node divides up the blocks into their semantic parts producing a much
+# richer AST albeit more work to parse and traverse.
+
+Node       <-- Title SemanticB* Footnotes?
+SemanticB   <- Includes / Separator / Bulleted / Numbered / Figure /
+               Fenced / Latex / ShortQuote / LongQuote / Division /
+               Paragraph
+
+# ---------------------------------------------------------------------
+
+IncUnfold  <-- '+ ' Link
+IncFold    <-- '- ' Link
+
+# ---------------------------------------------------------------------
+
+# TODO handle nested lists
+
+DexEntry   <-- '*' SP IsoDate SP '[' NodeTitle '](/' NodeID ')'
+NodeTitle  <-- uprint+
+NodeID     <-- digit+
+
+Bullet      <- BulletStar / BulletDash / BulletPlus
+BulletStar <-- '*' SP < Paragraph >
+BulletDash <-- '-' SP < Paragraph >
+BulletPlus <-- '+' SP < Paragraph >
+
+Number     <-- digit{1,8} '.' SP < Paragraph >
+
+Span       <-- Inflect / Beacon / Lede / Verbatim / Math / Deleted / Plain
+
+LedePara   <--  &Lede Para
+
+NodeLink      <-- # 
+
+Fenced        <-- <=tag ('~'{3,8} / BTICK{3,8}) > Attributes?
+                  !tag rune+ tag
+
+Div           <-- <=tag ':'{3,8} Attributes >
+                  !tag rune+ tag
+
+Attributes    <-- SimpleClass / BracedAttributes
+
+# TODO have this work with MyST directives
+Attributes    <-- ClassName / '{' ('#' Anchor) ('.' ClassName)* Attribute* '}'
+
+SimpleClass   <-- ClassName
+
+Include       <-- NodeInclude / FileInclude
+NodeInclude   <-- '*' SP '[' NodeTitle '](/' NodeID QueryCode? ')' EndLine
+FileInclude   <-- '*' SP '[' NodeTitle '](' !'/' File QueryCode? ')' EndLine
+File          <-- (!')' !'?' uprint)+
+QueryCode     <-  '?' (ResQCode / QCode)
+ResQCode      <-- upper+
+QCode         <-- lower+
+
+Bold          <-- '**' !'**' Span+ '**'
+Inflect       <-- '*' !'*' Span+ '*'
+
+Tags          <-- SP{4} Tag+
+Tag           <-- hashtag TODO
+
+Deleted       <-- '~~' !'~~' Span+ '~~'
+Parens        <-- '(' !'(' Span+ ')'
+Bracketed     <-- '[' !'[' Span+ ']'
+Mustached     <-- '{{' !'{{' Span+ '}}'
+Braced        <-- '{' !'{' Span+ '}'
+Angled        <-- '<' !'>' Span+ '>'
+SQuoted       <-- SQ !SQ Span+ SQ
+DQuoted       <-- DQ !DQ Span+ DQ
+
+
+LongDash      <-- '---'
+ShortDash     <-- '--'
+Ellipsis      <-- '...'
+
+Word          <-- uprint+
+
+hashtag       <- '#' / uFF03
+
+ws            <- LF / SP
+

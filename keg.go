@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 func exists(path string) bool {
@@ -123,4 +124,9 @@ func keys[M ~map[K]T, T any, K comparable](in M) []K {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func lastMod(file string) time.Time {
+	info, _ := os.Stat(file)
+	return info.ModTime()
 }
